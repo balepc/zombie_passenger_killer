@@ -21,6 +21,7 @@ BANNER
   opts.on("-g", "--grace [SECONDS]", Integer, "Wait SECONDS before hard-killing (-9) a process (default: 5)") {|i| options[:grace]=i }
   opts.on("-i", "--interval [SECONDS]", Integer, "Check every SECONDS (default: 10)") {|i| options[:interval]=i }
   opts.on("-p", "--pattern [PATTERN]", String, "Find processes with this pattern (default: ' Rack: ')") {|i| options[:pattern]=i }
+  opts.on("-n", "--no-daemon","Do not start daemon. Check once and exit") {|i| options[:no_daemon]=i }
   opts.on("-r", "--rvm-sudo","Use `rvmsudo` to see passenger-status") {|i| options[:rvm_sudo]=i }
   opts.on("-h", "--help","Show this") { puts opts; exit }
   opts.on("-v", "--version","Show Version"){ puts version; exit }
@@ -31,4 +32,8 @@ $stdout.sync = true
 puts "PID: #{$$} Version: #{version} Started at #{Time.now}"
 
 $0 = File.basename(__FILE__) + '-' + version
-ZombiePassengerKiller::Reaper.new(options).lurk
+unless options[:no_daemon].nil?
+  ZombiePassengerKiller::Reaper.new(options).hunt_zombies
+else
+  ZombiePassengerKiller::Reaper.new(options).lurk
+end
